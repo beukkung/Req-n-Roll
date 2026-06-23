@@ -8,6 +8,7 @@
     "build:pages": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:req-gym": "node --experimental-strip-types scripts/validate-req-gym-bank.mjs",
     "supabase": "supabase",
     "db:link": "supabase link",
     "db:push": "supabase db push",

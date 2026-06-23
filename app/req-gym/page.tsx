@@ -8,7 +8,7 @@ import { createStaticClient } from "@/lib/supabase/static";
 export const metadata = {
   title: "Req Gym",
   description:
-    "ฝึกโจทย์ IIBA-aligned ครอบคลุม BABOK knowledge areas สำหรับคนเตรียม ECBA",
+    "คลังข้อสอบฝึก BA certification-style 1,000 ข้อ ครอบคลุม BABOK knowledge areas สำหรับคนเตรียม ECBA, CCBA และ CBAP",
 };
 
 export default async function ReqGymPage() {
@@ -26,8 +26,8 @@ export default async function ReqGymPage() {
     <div className="py-12 sm:py-16">
       <PageHeader
         eyebrow="Req Gym"
-        title="ยกดัมเบล Requirement"
-        description="ฝึกโจทย์ IIBA-aligned ครอบคลุม 6 BABOK knowledge areas ตอบแล้วเห็นคำอธิบายทันที ยิ่งฝึกยิ่งแม่น เหมาะกับคนเตรียม ECBA"
+        title="BA Certification Practice Gym"
+        description="ฝึกข้อสอบสถานการณ์แบบ BA certification-style ครอบคลุม 6 BABOK knowledge areas พร้อมคำอธิบายทันที เหมาะกับคนเตรียม ECBA, CCBA และ CBAP"
       >
         <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-600 text-secondary-foreground">
           <Dumbbell className="h-3.5 w-3.5" /> โจทย์ทั้งหมด {reqGymQuestions.length} ข้อ

@@ -73,7 +73,9 @@ export type KnowledgeArea =
   | "elicitation_collaboration"
   | "requirements_lifecycle"
   | "strategy_analysis"
+  | "requirements_analysis_design"
   | "solution_evaluation"
+  /** Legacy local/remote sample area from the initial beta bank. */
   | "underlying_competencies";
 
 export type ReqGymQuestion = {

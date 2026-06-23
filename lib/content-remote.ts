@@ -1,10 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   DAILY_REQ_QUESTIONS,
-  REQ_GYM_QUESTIONS,
   SKILL_AMP_QUESTIONS,
   TEMPLATES,
 } from "./content";
+import { REQ_GYM_QUESTIONS, resolveReqGymQuestionBank } from "./req-gym-bank";
 import type {
   DailyReqQuestion,
   KnowledgeArea,
@@ -107,7 +107,7 @@ export async function getReqGymQuestionsRemote(
 
   if (error || !data || data.length === 0) return REQ_GYM_QUESTIONS;
 
-  return (data as ReqGymQuestionRow[]).map((row) => ({
+  return resolveReqGymQuestionBank((data as ReqGymQuestionRow[]).map((row) => ({
     id: row.id,
     area: row.knowledge_area as KnowledgeArea,
     difficulty: row.difficulty as ReqGymQuestion["difficulty"],
@@ -115,7 +115,7 @@ export async function getReqGymQuestionsRemote(
     options: optionsFromJson(row.options),
     answer: Number(row.answer),
     explanationTh: row.explanation_th,
-  }));
+  })));
 }
 
 export function selectReqGymQuestions(

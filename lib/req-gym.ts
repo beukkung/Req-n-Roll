@@ -1,4 +1,8 @@
-import { REQ_GYM_QUESTIONS } from "./content";
+import {
+  REQ_GYM_OFFICIAL_AREAS,
+  REQ_GYM_QUESTIONS,
+  type OfficialReqGymArea,
+} from "./req-gym-bank";
 import type { KnowledgeArea, ReqGymQuestion } from "./types";
 import { seededShuffle } from "./storage";
 import { ensureNickProfile } from "./supabase/nickname-profile";
@@ -13,39 +17,39 @@ export type ReqGymSet = {
 
 /** Knowledge-area picker labels (IIBA BABOK-aligned, not official). */
 export const REQ_GYM_AREAS: {
-  slug: KnowledgeArea;
+  slug: OfficialReqGymArea;
   nameTh: string;
   shortTh: string;
 }[] = [
   {
-    slug: "business_analysis_planning",
-    nameTh: "Business Analysis Planning",
+    slug: REQ_GYM_OFFICIAL_AREAS[0],
+    nameTh: "Business Analysis Planning & Monitoring",
     shortTh: "วางแผนงานวิเคราะห์",
   },
   {
-    slug: "elicitation_collaboration",
+    slug: REQ_GYM_OFFICIAL_AREAS[1],
     nameTh: "Elicitation & Collaboration",
     shortTh: "ดึงและระดมข้อมูล",
   },
   {
-    slug: "requirements_lifecycle",
+    slug: REQ_GYM_OFFICIAL_AREAS[2],
     nameTh: "Requirements Life Cycle Management",
     shortTh: "จัดการวงจร requirement",
   },
   {
-    slug: "strategy_analysis",
+    slug: REQ_GYM_OFFICIAL_AREAS[3],
     nameTh: "Strategy Analysis",
     shortTh: "วิเคราะห์กลยุทธ์",
   },
   {
-    slug: "solution_evaluation",
-    nameTh: "Solution Evaluation",
-    shortTh: "ประเมินผลลัพธ์",
+    slug: REQ_GYM_OFFICIAL_AREAS[4],
+    nameTh: "Requirements Analysis & Design Definition",
+    shortTh: "วิเคราะห์และนิยาม solution",
   },
   {
-    slug: "underlying_competencies",
-    nameTh: "Underlying Competencies",
-    shortTh: "ทักษะพื้นฐาน",
+    slug: REQ_GYM_OFFICIAL_AREAS[5],
+    nameTh: "Solution Evaluation",
+    shortTh: "ประเมินผลลัพธ์",
   },
 ];
 

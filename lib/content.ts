@@ -11,9 +11,9 @@ import type {
  * Starter content for Req'n Roll v0.1 internal beta.
  *
  * NOTE: This is placeholder/demo content authored to unblock the frontend build.
- * The plan calls for 30-40 Skill Amp questions, 10 Daily Req, and 30 Req Gym
- * questions authored with a BABOK-knowledgeable reviewer (long pole — Step 11).
- * Treat the counts here as representative samples, not final.
+ * Req Gym now uses the canonical 1,000-question certification-style bank in
+ * req-gym-bank.ts. Treat the smaller sections here as representative samples
+ * or supporting content, not the full practice catalog.
  */
 
 export const SKILLS: Skill[] = [
@@ -303,7 +303,9 @@ export const DAILY_REQ_QUESTIONS: DailyReqQuestion[] = [
 /* Req Gym — IIBA-aligned practice across BABOK knowledge areas        */
 /* ------------------------------------------------------------------ */
 
-export const REQ_GYM_QUESTIONS: ReqGymQuestion[] = [
+export { REQ_GYM_QUESTIONS } from "./req-gym-bank";
+
+export const LEGACY_REQ_GYM_SAMPLE_QUESTIONS: ReqGymQuestion[] = [
   {
     id: "rg-1",
     area: "elicitation_collaboration",

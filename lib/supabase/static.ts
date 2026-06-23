@@ -2,7 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseConfig } from "./env";
 
 /**
- * Build-time/static Supabase client for GitHub Pages export.
+ * Build-time/static Supabase client for static-safe rendering.
  * It uses the public anon key and does not touch cookies or server sessions.
  */
 export function createStaticClient() {
