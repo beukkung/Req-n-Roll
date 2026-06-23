@@ -30,6 +30,7 @@
 /.kilo/
 /.opencode/
 /.playwright-mcp/
+/.supabase-home/
 
 # debug
 npm-debug.log*
