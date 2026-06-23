@@ -63,6 +63,7 @@ export function ProgressPanel() {
                 <div
                   className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-secondary"
                   role="progressbar"
+                  aria-label="ความคืบหน้า XP"
                   aria-valuenow={Math.round(level.progress * 100)}
                   aria-valuemin={0}
                   aria-valuemax={100}
@@ -117,7 +118,7 @@ export function ProgressPanel() {
 
           <Link
             href={started ? "/profile" : "/daily-req"}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-600 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+            className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-600 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
           >
             {started ? "ดูโปรไฟล์ของฉัน" : "เริ่มเล่น Daily Req"}
             <ArrowRight className="h-4 w-4" />

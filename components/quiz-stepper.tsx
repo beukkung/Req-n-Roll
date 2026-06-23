@@ -81,6 +81,8 @@ export function QuizStepper({
 
   const canAdvance =
     currentAnswer !== null && (mode === "likert" || currentRevealed);
+  const progressLabel =
+    mode === "mcq" ? "ความคืบหน้าชุดคำถาม" : "ความคืบหน้าแบบประเมิน";
 
   return (
     <div>
@@ -91,7 +93,7 @@ export function QuizStepper({
             ข้อ {index + 1} / {total}
           </span>
           {mode === "mcq" ? (
-            <span>score {correctCount ?? 0}</span>
+            <span>คะแนน {correctCount ?? 0}</span>
           ) : (
             <span>{progress}%</span>
           )}
@@ -99,6 +101,7 @@ export function QuizStepper({
         <div
           className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary"
           role="progressbar"
+          aria-label={progressLabel}
           aria-valuenow={progress}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -122,23 +125,23 @@ export function QuizStepper({
         onSelect={select}
       />
 
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={prev}
           disabled={index === 0}
-          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex min-h-11 items-center justify-center gap-1 rounded-md border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowLeft className="h-4 w-4" /> ก่อนหน้า
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {mode === "mcq" && !currentRevealed ? (
             <button
               type="button"
               onClick={reveal}
               disabled={currentAnswer === null}
-              className="inline-flex items-center gap-1 rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-11 items-center justify-center gap-1 rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <CheckCircle2 className="h-4 w-4" /> ตรวจคำตอบ
             </button>
@@ -149,7 +152,7 @@ export function QuizStepper({
             onClick={next}
             disabled={!canAdvance}
             className={cn(
-              "inline-flex items-center gap-1 rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+              "inline-flex min-h-11 items-center justify-center gap-1 rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
               isLast
                 ? "bg-accent text-accent-foreground hover:bg-accent/90"
                 : "bg-primary text-primary-foreground hover:bg-primary/90",

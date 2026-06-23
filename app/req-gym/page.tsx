@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Dumbbell } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { getReqGymSets } from "@/lib/req-gym";
+import { getReqGymPracticeSetSize } from "@/lib/req-gym-practice";
 import { getReqGymQuestionsRemote } from "@/lib/content-remote";
 import { createStaticClient } from "@/lib/supabase/static";
 
@@ -27,7 +28,7 @@ export default async function ReqGymPage() {
       <PageHeader
         eyebrow="Req Gym"
         title="BA Certification Practice Gym"
-        description="ฝึกข้อสอบสถานการณ์แบบ BA certification-style ครอบคลุม 6 BABOK knowledge areas พร้อมคำอธิบายทันที เหมาะกับคนเตรียม ECBA, CCBA และ CBAP"
+        description="ฝึกข้อสอบสถานการณ์แบบ BA certification-style ครอบคลุม 6 BABOK knowledge areas แต่ละรอบเป็นชุดสุ่มสั้น ๆ พร้อมคำอธิบายทันที เหมาะกับคนเตรียม ECBA, CCBA และ CBAP"
       >
         <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-600 text-secondary-foreground">
           <Dumbbell className="h-3.5 w-3.5" /> โจทย์ทั้งหมด {reqGymQuestions.length} ข้อ
@@ -38,6 +39,7 @@ export default async function ReqGymPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           {sets.map((set) => {
             const count = set.mock ? reqGymQuestions.length : countByArea[set.id] ?? 0;
+            const setSize = Math.min(getReqGymPracticeSetSize(set.id), count);
             return (
               <Link
                 key={set.id}
@@ -48,7 +50,7 @@ export default async function ReqGymPage() {
                   <h2 className="font-display text-lg font-700">{set.nameTh}</h2>
                   <p className="mt-1 text-sm text-foreground/70">{set.shortTh}</p>
                   <p className="mt-3 text-xs font-600 text-muted-foreground">
-                    {count} ข้อ · instant feedback
+                    สุ่ม {setSize} ข้อ/รอบ · จากคลัง {count} ข้อ
                   </p>
                 </div>
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/12 text-primary transition-transform group-hover:translate-x-0.5">

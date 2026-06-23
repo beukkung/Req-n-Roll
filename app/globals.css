@@ -65,16 +65,16 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.19 0.02 264);
 
-  /* Primary = vivid amber (the "roll" energy) */
-  --primary: oklch(0.72 0.182 61);
-  --primary-foreground: oklch(0.16 0.02 61);
+  /* Primary = deep amber, usable for both text links and action fills */
+  --primary: oklch(0.5 0.16 61);
+  --primary-foreground: oklch(0.99 0.004 95);
 
   /* Brand token (alias of primary, for explicit brand usage) */
-  --brand: oklch(0.72 0.182 61);
-  --brand-foreground: oklch(0.16 0.02 61);
+  --brand: var(--primary);
+  --brand-foreground: var(--primary-foreground);
 
-  /* Accent = electric violet for high-contrast pops */
-  --accent: oklch(0.62 0.225 296);
+  /* Accent = violet for secondary high-emphasis actions */
+  --accent: oklch(0.55 0.22 296);
   --accent-foreground: oklch(0.99 0 0);
 
   --secondary: oklch(0.96 0.008 264);
@@ -84,11 +84,11 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.9 0.008 264);
   --input: oklch(0.9 0.008 264);
-  --ring: var(--primary);
+  --ring: oklch(0.58 0.17 61);
 
   /* Six vivid chart colors for the Skill Amp radar */
-  --chart-1: oklch(0.72 0.182 61);
-  --chart-2: oklch(0.62 0.225 296);
+  --chart-1: oklch(0.58 0.16 61);
+  --chart-2: oklch(0.55 0.22 296);
   --chart-3: oklch(0.72 0.15 210);
   --chart-4: oklch(0.78 0.19 145);
   --chart-5: oklch(0.66 0.23 350);
@@ -111,12 +111,12 @@
   --card-foreground: oklch(0.97 0.005 95);
   --popover: oklch(0.205 0.015 264);
   --popover-foreground: oklch(0.97 0.005 95);
-  --primary: oklch(0.78 0.17 61);
-  --primary-foreground: oklch(0.16 0.02 61);
-  --brand: oklch(0.78 0.17 61);
-  --brand-foreground: oklch(0.16 0.02 61);
-  --accent: oklch(0.68 0.21 296);
-  --accent-foreground: oklch(0.99 0 0);
+  --primary: oklch(0.76 0.16 61);
+  --primary-foreground: oklch(0.15 0.018 61);
+  --brand: var(--primary);
+  --brand-foreground: var(--primary-foreground);
+  --accent: oklch(0.64 0.19 296);
+  --accent-foreground: oklch(0.15 0.018 296);
   --secondary: oklch(0.26 0.015 264);
   --secondary-foreground: oklch(0.97 0.005 95);
   --muted: oklch(0.26 0.015 264);
@@ -190,6 +190,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
   .animate-toast-in,
   .animate-pop { animation: none; }
   .confetti-piece { display: none; }

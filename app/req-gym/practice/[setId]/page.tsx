@@ -33,19 +33,7 @@ export default async function PracticePage({
   if (!set) notFound();
 
   const questionBank = await getReqGymQuestionsRemote(createStaticClient());
-  const questions = selectReqGymQuestions(questionBank, setId).map((q) => ({
-    id: q.id,
-    prompt: q.promptTh,
-    tag:
-      q.difficulty === "easy"
-        ? "ง่าย"
-        : q.difficulty === "medium"
-          ? "กลาง"
-          : "ยาก",
-    options: q.options,
-    correctIndex: q.answer,
-    explanation: q.explanationTh,
-  }));
+  const questions = selectReqGymQuestions(questionBank, setId);
 
   return (
     <div className="py-12 sm:py-16">

@@ -25,6 +25,7 @@ export default async function TemplatesPage() {
       </PageHeader>
 
       <section className="mx-auto mt-10 w-full max-w-5xl px-4 sm:px-6">
+        <h2 className="sr-only">รายการแม่แบบ</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {templates.map((t) => (
             <TemplateCard key={t.slug} template={t} />

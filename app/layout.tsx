@@ -45,6 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="th"
+      data-scroll-behavior="smooth"
       className={`${ibmPlexSansThai.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">

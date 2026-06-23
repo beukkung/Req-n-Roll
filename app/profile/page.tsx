@@ -92,6 +92,7 @@ export default function ProfilePage() {
               <div
                 className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-secondary"
                 role="progressbar"
+                aria-label="ความคืบหน้า XP"
                 aria-valuenow={Math.round(level.progress * 100)}
                 aria-valuemin={0}
                 aria-valuemax={100}
@@ -141,7 +142,7 @@ export default function ProfilePage() {
               </p>
               <Link
                 href="/skill-amp"
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-600 text-primary-foreground hover:bg-primary/90"
+                className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-600 text-primary-foreground hover:bg-primary/90"
               >
                 เริ่มวัดสกิล <ArrowRight className="h-4 w-4" />
               </Link>

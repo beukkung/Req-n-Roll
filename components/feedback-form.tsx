@@ -72,7 +72,7 @@ export function FeedbackForm() {
             setComment("");
             setUsedForRealWork(false);
           }}
-          className="mt-4 text-sm font-600 text-primary hover:underline"
+          className="mt-4 inline-flex min-h-11 items-center text-sm font-600 text-primary hover:underline"
         >
           ส่ง feedback อีกครั้ง
         </button>
@@ -103,7 +103,7 @@ export function FeedbackForm() {
                 onMouseEnter={() => setHover(v)}
                 onFocus={() => setHover(v)}
                 onBlur={() => setHover(0)}
-                className="rounded-md p-1 transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-md transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <Star
                   className={cn(
@@ -129,9 +129,10 @@ export function FeedbackForm() {
           type="button"
           role="switch"
           aria-checked={usedForRealWork}
+          aria-label="เอาไปใช้ในงานจริงแล้ว"
           onClick={() => setUsedForRealWork((v) => !v)}
           className={cn(
-            "mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            "mt-0.5 inline-flex h-11 w-16 shrink-0 items-center rounded-full border px-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
             usedForRealWork
               ? "border-primary bg-primary"
               : "border-border bg-secondary",
@@ -139,8 +140,8 @@ export function FeedbackForm() {
         >
           <span
             className={cn(
-              "h-4 w-4 rounded-full bg-white shadow transition-transform",
-              usedForRealWork ? "translate-x-6" : "translate-x-1",
+              "h-6 w-6 rounded-full bg-white shadow transition-transform",
+              usedForRealWork ? "translate-x-8" : "translate-x-0",
             )}
           />
         </button>
@@ -161,7 +162,7 @@ export function FeedbackForm() {
           id={`${name}-cat`}
           value={category}
           onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
-          className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
+          className="mt-2 min-h-11 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
         >
           {FEEDBACK_CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
@@ -199,7 +200,7 @@ export function FeedbackForm() {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-600 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-600 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
         {status === "submitting" ? (
           <>

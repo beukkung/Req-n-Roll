@@ -67,7 +67,7 @@ function NicknameForm({
         aria-invalid={showError}
         aria-describedby={showError ? `${inputId}-err` : undefined}
         placeholder="เช่น น้องแมว หรือ PropertyKing"
-        className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        className="min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
       />
       {showError ? (
         <p id={`${inputId}-err`} role="alert" className="mt-1.5 text-xs text-destructive">

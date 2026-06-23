@@ -49,91 +49,105 @@ export function QuestionCard({
       <h2 className="mt-1 text-lg font-600 leading-snug sm:text-xl">{prompt}</h2>
 
       {mode === "likert" ? (
-        <fieldset className="mt-5" aria-describedby={`${fieldId}-desc`}>
-          <legend id={`${fieldId}-desc`} className="sr-only">
+        <fieldset className="mt-5">
+          <legend id={`${fieldId}-legend`} className="sr-only">
             เลือกระดับความเห็นด้วยตั้งแต่ 1 ถึง 5
           </legend>
           <div
-            role="radiogroup"
-            aria-label="ระดับความเห็นด้วย"
             className="grid grid-cols-5 gap-2"
+            aria-describedby={`${fieldId}-legend`}
           >
             {LIKERT_LABELS.map((label, i) => {
               const score = i + 1;
               const selected = value === score;
+              const optionId = `${fieldId}-likert-${score}`;
               return (
-                <button
-                  key={score}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  aria-label={label}
-                  title={label}
-                  onClick={() => onSelect(score)}
-                  className={cn(
-                    "flex h-16 flex-col items-center justify-center rounded-lg border text-center transition-all",
-                    selected
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border bg-background hover:border-primary/50 hover:bg-secondary",
-                  )}
-                >
-                  <span className="font-display text-xl font-700">{score}</span>
-                  <span className="mt-0.5 hidden text-[10px] leading-tight opacity-80 sm:block">
-                    {label}
-                  </span>
-                </button>
+                <div key={score} className="relative">
+                  <input
+                    id={optionId}
+                    type="radio"
+                    name={fieldId}
+                    value={score}
+                    checked={selected}
+                    onChange={() => onSelect(score)}
+                    className="peer sr-only"
+                  />
+                  <label
+                    htmlFor={optionId}
+                    title={label}
+                    className={cn(
+                      "flex min-h-16 cursor-pointer flex-col items-center justify-center rounded-lg border text-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-ring/50",
+                      selected
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border bg-background hover:border-primary/50 hover:bg-secondary",
+                    )}
+                  >
+                    <span className="font-display text-xl font-700">{score}</span>
+                    <span className="mt-0.5 hidden text-[10px] leading-tight opacity-85 sm:block">
+                      {label}
+                    </span>
+                  </label>
+                </div>
               );
             })}
           </div>
         </fieldset>
       ) : (
-        <div
-          role="radiogroup"
-          aria-label="ตัวเลือกคำตอบ"
-          className="mt-5 grid gap-2"
-        >
-          {options?.map((opt, i) => {
-            const selected = value === i;
-            const isCorrect = revealed && i === correctIndex;
-            const isWrongPick = revealed && selected && i !== correctIndex;
-            return (
-              <button
-                key={i}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                disabled={revealed}
-                onClick={() => onSelect(i)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg border p-3 text-left transition-all",
-                  !revealed && selected && "border-primary bg-primary/8",
-                  !revealed && !selected && "border-border hover:border-primary/50 hover:bg-secondary",
-                  isCorrect && "border-emerald-500 bg-emerald-500/10",
-                  isWrongPick && "border-destructive bg-destructive/10",
-                  revealed && !isCorrect && !isWrongPick && "border-border opacity-70",
-                )}
-              >
-                <span
-                  className={cn(
-                    "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-700",
-                    selected ? "border-primary bg-primary text-primary-foreground" : "border-border",
-                    isCorrect && "border-emerald-500 bg-emerald-500 text-white",
-                    isWrongPick && "border-destructive bg-destructive text-white",
-                  )}
-                >
-                  {isCorrect ? (
-                    <Check className="h-3.5 w-3.5" />
-                  ) : isWrongPick ? (
-                    <X className="h-3.5 w-3.5" />
-                  ) : (
-                    String.fromCharCode(65 + i)
-                  )}
-                </span>
-                <span className="text-sm">{opt}</span>
-              </button>
-            );
-          })}
-        </div>
+        <fieldset className="mt-5">
+          <legend className="sr-only">ตัวเลือกคำตอบ</legend>
+          <div className="grid gap-2">
+            {options?.map((opt, i) => {
+              const selected = value === i;
+              const isCorrect = revealed && i === correctIndex;
+              const isWrongPick = revealed && selected && i !== correctIndex;
+              const optionId = `${fieldId}-option-${i}`;
+              return (
+                <div key={i} className="relative">
+                  <input
+                    id={optionId}
+                    type="radio"
+                    name={fieldId}
+                    value={i}
+                    checked={selected}
+                    disabled={revealed}
+                    onChange={() => onSelect(i)}
+                    className="peer sr-only"
+                  />
+                  <label
+                    htmlFor={optionId}
+                    className={cn(
+                      "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-ring/50",
+                      !revealed && selected && "border-primary bg-primary/8",
+                      !revealed && !selected && "border-border hover:border-primary/50 hover:bg-secondary",
+                      isCorrect && "border-emerald-600 bg-emerald-500/10",
+                      isWrongPick && "border-destructive bg-destructive/10",
+                      revealed && !isCorrect && !isWrongPick && "cursor-default border-border opacity-70",
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-700",
+                        selected ? "border-primary bg-primary text-primary-foreground" : "border-border",
+                        isCorrect && "border-emerald-600 bg-emerald-600 text-white",
+                        isWrongPick && "border-destructive bg-destructive text-white",
+                      )}
+                    >
+                      {isCorrect ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : isWrongPick ? (
+                        <X className="h-3.5 w-3.5" />
+                      ) : (
+                        String.fromCharCode(65 + i)
+                      )}
+                    </span>
+                    <span className="text-sm">{opt}</span>
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </fieldset>
       )}
 
       {mode === "mcq" && revealed ? (

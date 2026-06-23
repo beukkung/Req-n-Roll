@@ -3,6 +3,11 @@ import {
   REQ_GYM_QUESTION_TARGET,
   REQ_GYM_QUESTIONS,
 } from "../lib/req-gym-bank.ts";
+import {
+  REQ_GYM_AREA_SET_SIZE,
+  REQ_GYM_MOCK_SET_SIZE,
+  selectReqGymPracticeQuestions,
+} from "../lib/req-gym-practice.ts";
 
 function fail(message) {
   throw new Error(message);
@@ -59,12 +64,42 @@ for (const [difficulty, count] of difficultyCounts) {
   if (count < 200) fail(`${difficulty} difficulty has too few questions: ${count}`);
 }
 
+const areaPool = REQ_GYM_QUESTIONS.filter((question) => question.area === "strategy_analysis");
+const stableAreaSet = selectReqGymPracticeQuestions(areaPool, "strategy_analysis", 12345);
+const repeatedAreaSet = selectReqGymPracticeQuestions(areaPool, "strategy_analysis", 12345);
+const nextAreaSet = selectReqGymPracticeQuestions(areaPool, "strategy_analysis", 12346);
+
+if (stableAreaSet.length !== REQ_GYM_AREA_SET_SIZE) {
+  fail(`area practice set should have ${REQ_GYM_AREA_SET_SIZE} questions, got ${stableAreaSet.length}`);
+}
+
+if (stableAreaSet.map((question) => question.id).join("|") !== repeatedAreaSet.map((question) => question.id).join("|")) {
+  fail("same area seed should produce the same practice set");
+}
+
+if (stableAreaSet.map((question) => question.id).join("|") === nextAreaSet.map((question) => question.id).join("|")) {
+  fail("different area seeds should produce a different practice set");
+}
+
+const mockSet = selectReqGymPracticeQuestions(REQ_GYM_QUESTIONS, "mock", 54321);
+const mockAreas = new Set(mockSet.map((question) => question.area));
+
+if (mockSet.length !== REQ_GYM_MOCK_SET_SIZE) {
+  fail(`mock practice set should have ${REQ_GYM_MOCK_SET_SIZE} questions, got ${mockSet.length}`);
+}
+
+for (const area of REQ_GYM_OFFICIAL_AREAS) {
+  if (!mockAreas.has(area)) fail(`mock practice set is missing area: ${area}`);
+}
+
 console.log(
   JSON.stringify(
     {
       total: REQ_GYM_QUESTIONS.length,
       areas: Object.fromEntries(areaCounts),
       difficulties: Object.fromEntries(difficultyCounts),
+      practiceSetSize: REQ_GYM_AREA_SET_SIZE,
+      mockSetSize: REQ_GYM_MOCK_SET_SIZE,
     },
     null,
     2,

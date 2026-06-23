@@ -15,7 +15,7 @@ export function XpChip({ className }: { className?: string }) {
     <Link
       href="/profile"
       className={cn(
-        "group inline-flex items-center gap-2 rounded-full border border-border bg-background pl-1 pr-2.5 py-1 transition-colors hover:border-primary/50 hover:bg-secondary",
+        "group inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background py-1 pl-1 pr-2.5 transition-colors hover:border-primary/50 hover:bg-secondary",
         className,
       )}
       aria-label={`${name}, เลเวล ${level.level} ${level.title}, สตรีค ${streak} วัน`}
