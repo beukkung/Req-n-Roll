@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_BASE_PATH: /Req-n-Roll
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: https://rdlidsrbdhkkncedrgxb.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_rvDOHnZWbS9QiPn6HH-p1A_9sbMBTOk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
