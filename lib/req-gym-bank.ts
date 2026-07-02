@@ -1,4 +1,10 @@
-import type { KnowledgeArea, ReqGymQuestion } from "./types";
+import type {
+  KnowledgeArea,
+  ReqGymBaccmConcept,
+  ReqGymBankingTag,
+  ReqGymEcbaDomain,
+  ReqGymQuestion,
+} from "./types";
 
 export const REQ_GYM_QUESTION_TARGET = 1000;
 
@@ -12,6 +18,46 @@ export const REQ_GYM_OFFICIAL_AREAS = [
 ] as const satisfies readonly KnowledgeArea[];
 
 export type OfficialReqGymArea = (typeof REQ_GYM_OFFICIAL_AREAS)[number];
+
+export const REQ_GYM_ECBA_DOMAINS = [
+  "Understanding Business Analysis",
+  "Mindset for Effective Business Analysis",
+  "Implementing Business Analysis",
+  "Change",
+  "Need",
+  "Solution",
+  "Stakeholder",
+  "Value",
+  "Context",
+] as const satisfies readonly ReqGymEcbaDomain[];
+
+export const REQ_GYM_BACCM_CONCEPTS = [
+  "Change",
+  "Need",
+  "Solution",
+  "Stakeholder",
+  "Value",
+  "Context",
+] as const satisfies readonly ReqGymBaccmConcept[];
+
+export const REQ_GYM_BANKING_TAGS = [
+  "KYC / e-KYC",
+  "AML / CFT / CPF",
+  "Fraud / Scam / Mule Account",
+  "Payment Systems",
+  "IT Risk / Cyber Resilience",
+  "Data Governance",
+  "PDPA / Consent / Privacy",
+  "Responsible Lending",
+  "Market Conduct / Customer Protection",
+  "Operational Risk",
+  "Third Party / Vendor",
+  "Regulatory Reporting",
+  "Branch Operations",
+  "Credit Underwriting",
+  "Collections / Debt Assistance",
+  "Open Data / Customer Data Sharing",
+] as const satisfies readonly ReqGymBankingTag[];
 
 type Difficulty = ReqGymQuestion["difficulty"];
 
@@ -59,7 +105,302 @@ const AREA_PREFIX: Record<OfficialReqGymArea, string> = {
   solution_evaluation: "solev",
 };
 
+const AREA_ECBA_DOMAINS: Record<OfficialReqGymArea, readonly ReqGymEcbaDomain[]> = {
+  business_analysis_planning: [
+    "Implementing Business Analysis",
+    "Context",
+    "Stakeholder",
+    "Understanding Business Analysis",
+  ],
+  elicitation_collaboration: [
+    "Need",
+    "Stakeholder",
+    "Mindset for Effective Business Analysis",
+    "Context",
+  ],
+  requirements_lifecycle: ["Change", "Solution", "Value", "Stakeholder"],
+  strategy_analysis: ["Value", "Context", "Change", "Understanding Business Analysis"],
+  requirements_analysis_design: ["Solution", "Need", "Value", "Context"],
+  solution_evaluation: ["Value", "Solution", "Change", "Mindset for Effective Business Analysis"],
+};
+
+const DOMAIN_BACCM_CONCEPTS: Record<ReqGymEcbaDomain, readonly ReqGymBaccmConcept[]> = {
+  "Understanding Business Analysis": ["Need", "Solution", "Value"],
+  "Mindset for Effective Business Analysis": ["Stakeholder", "Context", "Value"],
+  "Implementing Business Analysis": ["Change", "Context", "Stakeholder"],
+  Change: ["Change", "Context", "Stakeholder"],
+  Need: ["Need", "Stakeholder", "Context"],
+  Solution: ["Solution", "Need", "Change"],
+  Stakeholder: ["Stakeholder", "Need", "Context"],
+  Value: ["Value", "Solution", "Change"],
+  Context: ["Context", "Stakeholder", "Change"],
+};
+
+const AREA_TESTING_POINTS: Record<OfficialReqGymArea, string> = {
+  business_analysis_planning:
+    "เลือกแนวทาง BA governance, stakeholder engagement และ information management ให้เหมาะกับความไม่แน่นอนของงาน",
+  elicitation_collaboration:
+    "เลือกวิธี elicitation และ evidence source ที่ช่วยยืนยัน need กับ stakeholder ในบริบทจริง",
+  requirements_lifecycle:
+    "คุม traceability, baseline, change impact และ requirement status ให้ตรวจสอบย้อนกลับได้",
+  strategy_analysis:
+    "วิเคราะห์ need, current state, future state, option และ value ก่อนกระโดดไป solution",
+  requirements_analysis_design:
+    "แปลง requirement เป็น model, acceptance criteria, design option และ scope ที่ test/operate ได้",
+  solution_evaluation:
+    "ประเมิน performance, limitation, adoption และ benefit realization ด้วย evidence หลังส่งมอบ",
+};
+
+const AREA_DISTRACTOR_RATIONALES: Record<OfficialReqGymArea, string> = {
+  business_analysis_planning:
+    "ตัวเลือกนี้ข้าม governance หรือ stakeholder coverage ทำให้ BA plan เสี่ยงต่อ scope และ decision drift",
+  elicitation_collaboration:
+    "ตัวเลือกนี้ลดคุณภาพการ elicitation เพราะไม่ยืนยัน objective, source, หรือ stakeholder evidence ที่จำเป็น",
+  requirements_lifecycle:
+    "ตัวเลือกนี้ทำให้ traceability หรือ impact analysis ขาดหลักฐาน จึงควบคุม requirement change ได้ไม่พอ",
+  strategy_analysis:
+    "ตัวเลือกนี้รีบตัดสิน solution ก่อนเข้าใจ need, context, current state, future state หรือ value trade-off",
+  requirements_analysis_design:
+    "ตัวเลือกนี้ไม่ช่วยแปลง requirement เป็น design/acceptance artifact ที่ตรวจสอบและทดสอบได้ชัดเจน",
+  solution_evaluation:
+    "ตัวเลือกนี้ใช้สัญญาณผิวเผินแทน evidence ของ performance, limitation, adoption หรือ benefit realization",
+};
+
 const CONTEXTS: CaseContext[] = [
+  {
+    org: "ธนาคารดิจิทัล",
+    initiative: "ปรับปรุง onboarding e-KYC สำหรับลูกค้าใหม่",
+    stakeholder: "Compliance, Product, สาขา และทีมปฏิบัติการ",
+    userGroup: "ลูกค้าใหม่ของธนาคาร",
+    metric: "ลด drop-off ในขั้นยืนยันตัวตน",
+    pain: "ลูกค้าต้องกรอกข้อมูลซ้ำและไม่รู้ว่าถูกปฏิเสธเพราะอะไร",
+    constraint: "PDPA, KYC และ audit trail",
+    system: "mobile banking, CRM และระบบตรวจสอบตัวตน",
+    process: "เปิดบัญชีออนไลน์",
+    risk: "การตีความข้อมูลบังคับไม่ตรงกันระหว่างสาขาและสำนักงานใหญ่",
+    data: "ข้อมูลตัวตน รูปถ่ายบัตร และผลตรวจ watchlist",
+  },
+  {
+    org: "ธนาคารพาณิชย์",
+    initiative: "ปรับ journey โอนเงินพร้อมเพย์และโอนต่างธนาคารบน mobile banking",
+    stakeholder: "Digital Channel, Operations, Fraud, Call Center และ BOT Compliance",
+    userGroup: "ลูกค้ารายย่อยที่โอนเงินผ่าน mobile banking",
+    metric: "ลด failed transfer และลด complaint เรื่องค่าธรรมเนียม",
+    pain: "ลูกค้าไม่เข้าใจวงเงิน ค่าธรรมเนียม และสถานะรายการเมื่อโอนเงินไม่สำเร็จ",
+    constraint: "วงเงินต่อวัน cut-off time AML screening และข้อกำกับ BOT",
+    system: "mobile banking, core banking, payment switch และ fraud monitoring",
+    process: "สร้างรายการโอนเงิน ตรวจวงเงิน ยืนยัน OTP และแจ้งผลรายการ",
+    risk: "สถานะรายการใน mobile banking กับ core banking ไม่ตรงกันหลัง timeout",
+    data: "เลขบัญชีปลายทาง หมายเลขพร้อมเพย์ วงเงิน ค่าธรรมเนียม และ transaction id",
+  },
+  {
+    org: "ฝ่ายสินเชื่อ SME ของธนาคาร",
+    initiative: "ลดเวลาพิจารณาสินเชื่อด้วย workflow scoring",
+    stakeholder: "Credit, Risk, Sales, Legal และทีมเอกสารสินเชื่อ",
+    userGroup: "เจ้าของกิจการ SME",
+    metric: "ลด turnaround time โดยไม่เพิ่ม NPL",
+    pain: "ลูกค้าส่งเอกสารหลายรอบและไม่เห็นเหตุผลที่ขอข้อมูลเพิ่ม",
+    constraint: "credit policy, risk appetite, credit bureau consent และเอกสารกำกับดูแล",
+    system: "loan origination, credit bureau connector, document vault และ core loan",
+    process: "ยื่นกู้ ตรวจเอกสาร วิเคราะห์เครดิต อนุมัติ และจัดทำสัญญา",
+    risk: "ทีมขายและทีม risk ใช้คำจำกัดความรายได้ไม่เหมือนกัน",
+    data: "งบการเงิน bank statement ภาษี หลักประกัน และคะแนนเครดิต",
+  },
+  {
+    org: "หน่วยงานสินเชื่อบ้านของธนาคาร",
+    initiative: "ปรับระบบ pre-approval และ refinance mortgage",
+    stakeholder: "Mortgage Sales, Credit Policy, Appraisal, Legal และ Operations",
+    userGroup: "ลูกค้าขอสินเชื่อบ้าน",
+    metric: "ลดเวลารอผล pre-approval และลดเคสเอกสารไม่ครบ",
+    pain: "ลูกค้าไม่รู้ว่าขั้นตอนไหนค้างที่ appraisal, policy exception หรือเอกสารรายได้",
+    constraint: "LTV rule, debt service ratio, appraisal validity และสัญญาหลักประกัน",
+    system: "mortgage origination, appraisal portal, document vault และ core loan",
+    process: "ประเมินคุณสมบัติ ตรวจหลักประกัน อนุมัติวงเงิน และนัดจดจำนอง",
+    risk: "การเปลี่ยนเงื่อนไข LTV หลังยื่นคำขอกระทบวงเงินอนุมัติ",
+    data: "รายได้ ภาระหนี้ ราคาประเมิน หลักประกัน และผล credit bureau",
+  },
+  {
+    org: "ทีมบัตรเครดิตของธนาคาร",
+    initiative: "เพิ่มระบบ dispute และ chargeback สำหรับรายการบัตรเครดิต",
+    stakeholder: "Card Operations, Fraud, Merchant Acquiring, Legal และ Call Center",
+    userGroup: "ผู้ถือบัตรเครดิต",
+    metric: "ลดเวลาปิด dispute และลดเคส chargeback ที่ขาดหลักฐาน",
+    pain: "ลูกค้าไม่รู้ว่าต้องส่งหลักฐานอะไรและสถานะ dispute อยู่ขั้นตอนไหน",
+    constraint: "card scheme rule, dispute SLA, fraud rule และ audit trail",
+    system: "card management, case management, merchant portal และ document archive",
+    process: "รับแจ้ง dispute ตรวจหลักฐาน provisional credit ติดตาม merchant และปิดเคส",
+    risk: "หลักฐานจาก merchant และข้อมูล transaction ไม่ตรงกันก่อนครบกำหนด SLA",
+    data: "เลขบัตรแบบ masked, transaction id, merchant id, dispute reason และเอกสารหลักฐาน",
+  },
+  {
+    org: "ฝ่ายบัตรเดบิตของธนาคาร",
+    initiative: "ปรับ flow อายัด ออกบัตรใหม่ และเปิดใช้งานบัตรเดบิต",
+    stakeholder: "Branch, Card Operations, Fraud, Contact Center และ IT Security",
+    userGroup: "ลูกค้าบัตรเดบิต",
+    metric: "ลดเวลารอออกบัตรใหม่และลด fraud หลังบัตรหาย",
+    pain: "ลูกค้าต้องแจ้งข้อมูลซ้ำระหว่าง contact center กับสาขา",
+    constraint: "KYC verification, card PIN policy, fraud block rule และ fee waiver",
+    system: "card issuing, core banking, CRM และ branch teller system",
+    process: "รับแจ้งบัตรเดบิตหาย อายัด ตรวจตัวตน ออกบัตรใหม่ และเปิดใช้งาน",
+    risk: "สถานะบัตรใน card system กับ core banking sync ไม่ทันหลังอายัด",
+    data: "card token, account link, block reason, replacement fee และ activation status",
+  },
+  {
+    org: "เครือข่ายสาขาของธนาคาร",
+    initiative: "ยกระดับ queue และ teller service สำหรับฝากถอนและเปิดบัญชี",
+    stakeholder: "Branch Operations, Teller, Customer Experience, Compliance และ Security",
+    userGroup: "ลูกค้าที่ใช้บริการสาขา",
+    metric: "ลดเวลารอคิวและลดเอกสารที่ถูกตีกลับ",
+    pain: "ลูกค้าไม่รู้ว่าต้องเตรียมเอกสารใดและถูกส่งต่อหลายเคาน์เตอร์",
+    constraint: "KYC form, cash handling limit, dual control และ branch operating hour",
+    system: "queue management, teller system, CRM และ document scanning",
+    process: "รับคิว ตรวจเอกสาร ทำรายการ teller และเก็บหลักฐาน",
+    risk: "ข้อมูลที่สแกนจากสาขาไม่ครบทำให้ back office ขอเอกสารซ้ำ",
+    data: "เลขคิว ประเภทบริการ เอกสาร KYC cash amount และ teller approval",
+  },
+  {
+    org: "ฝ่ายปฏิบัติการกลางของธนาคาร",
+    initiative: "ทำ workflow แก้ไขรายการโอนเงินผิดและ reversal",
+    stakeholder: "Payment Operations, Fraud, Legal, Call Center และธนาคารปลายทาง",
+    userGroup: "เจ้าหน้าที่ payment operations",
+    metric: "ลดเวลาตรวจสอบ reversal และลดรายการค้างข้ามวัน",
+    pain: "เจ้าหน้าที่ต้องไล่สถานะจากหลายระบบเมื่อรายการโอนเงิน timeout หรือ duplicated",
+    constraint: "payment scheme SLA, AML hold, customer consent และ accounting cut-off",
+    system: "payment switch, core banking, case management และ general ledger",
+    process: "รับเคส ตรวจสอบรายการ ติดต่อธนาคารปลายทาง ทำ reversal และปิดเคส",
+    risk: "reversal ถูกทำซ้ำหรือกระทบยอด GL ไม่ตรงหลัง cut-off",
+    data: "transaction id, settlement status, GL entry, customer consent และ case note",
+  },
+  {
+    org: "ทีม Corporate Cash Management ของธนาคาร",
+    initiative: "ปรับระบบ bulk payment และ approval matrix สำหรับลูกค้านิติบุคคล",
+    stakeholder: "Corporate Banking, Cash Ops, Product, Legal และลูกค้านิติบุคคล",
+    userGroup: "ผู้อนุมัติรายการของลูกค้านิติบุคคล",
+    metric: "ลด rejected batch และเพิ่ม straight-through processing",
+    pain: "ลูกค้านิติบุคคลไม่เห็นเหตุผลที่ batch payment ถูก reject รายรายการ",
+    constraint: "approval matrix, maker-checker, cut-off time, sanction screening และ file format",
+    system: "corporate portal, payment engine, H2H connector และ core banking",
+    process: "upload file ตรวจ format ทำ maker-checker ส่ง payment และรายงานผล",
+    risk: "approval matrix ไม่รองรับโครงสร้างบริษัทที่มีหลายระดับอำนาจ",
+    data: "payment file, debit account, beneficiary list, approval level และ reject code",
+  },
+  {
+    org: "ฝ่ายบัญชีเงินฝากสกุลต่างประเทศของธนาคาร",
+    initiative: "ปรับ inquiry และ service request สำหรับบัญชี FCD/e-FCD",
+    stakeholder: "Deposit Product, Branch, Treasury, BOT Reporting และ Operations",
+    userGroup: "ลูกค้าที่มีบัญชี FCD และ e-FCD",
+    metric: "ลดเคสข้อมูลบัญชีสกุลต่างประเทศผิดและลดเวลาตอบคำถามสาขา",
+    pain: "สาขาแยกประเภทบัญชี FCD/e-FCD ไม่ตรงกับ BOT parameter และ core banking",
+    constraint: "BOT parameter, FX regulation, ACCOUNT_TYPE mapping และ audit trail",
+    system: "core deposit, FX rate service, service link และ regulatory reporting",
+    process: "สอบถามบัญชี ตรวจประเภทบัญชี คำนวณยอดสกุลเงิน และออกเอกสาร",
+    risk: "การ map ACCOUNT_TYPE ผิดทำให้รายงาน BOT และหน้าจอสาขาไม่ตรงกัน",
+    data: "ACCOUNT_TYPE, currency, available balance, FX rate และ service code EASY101",
+  },
+  {
+    org: "ธุรกิจ Wealth Management ของธนาคาร",
+    initiative: "ทำ suitability assessment ของธนาคารก่อนเสนอผลิตภัณฑ์ลงทุน",
+    stakeholder: "Advisor, Compliance, Investment Product, Legal และลูกค้ารายย่อย",
+    userGroup: "ที่ปรึกษาการลงทุนของธนาคาร",
+    metric: "ลด mis-selling risk และเพิ่มความครบถ้วนของเอกสารยินยอม",
+    pain: "advisor ต้องกรอก suitability หลายระบบและลูกค้าไม่เข้าใจผลประเมิน",
+    constraint: "investor profile, product risk rating, consent และ suitability validity",
+    system: "advisor workstation, CRM, investment product catalog และ e-signature",
+    process: "ประเมินความเสี่ยง เสนอผลิตภัณฑ์ ตรวจ suitability และเก็บหลักฐานยินยอม",
+    risk: "คำแนะนำผลิตภัณฑ์ไม่สอดคล้องกับ risk profile ล่าสุดของลูกค้า",
+    data: "risk score, investment objective, product risk rating และ consent record",
+  },
+  {
+    org: "ทีม AML Monitoring ของธนาคาร",
+    initiative: "ปรับ AML case management สำหรับ alert ธุรกรรมต้องสงสัย",
+    stakeholder: "AML Compliance, Fraud, Operations, Relationship Manager และ Legal",
+    userGroup: "AML analyst",
+    metric: "ลด false positive และลดเวลาปิด alert ที่มีความเสี่ยงสูง",
+    pain: "analyst ต้องเปิดหลายระบบเพื่อดูพฤติกรรมลูกค้าและ rationale ของ alert",
+    constraint: "AML rule, sanction screening, STR timeline และ evidence retention",
+    system: "AML monitoring, core banking, customer profile และ case management",
+    process: "รับ AML alert ตรวจข้อมูลลูกค้า ขอเอกสาร ตัดสินใจ escalate และปิดเคส",
+    risk: "rationale ในการปิด alert ไม่พอสำหรับ audit หรือ regulatory review",
+    data: "alert id, customer risk rating, transaction pattern, watchlist hit และ case rationale",
+  },
+  {
+    org: "ฝ่าย Regulatory Reporting ของธนาคาร",
+    initiative: "ปรับระบบจัดทำรายงาน BOT และ reconcile ข้อมูลปลายเดือน",
+    stakeholder: "Finance, Risk, Compliance, Data Platform และเจ้าของระบบต้นทาง",
+    userGroup: "เจ้าหน้าที่ regulatory reporting",
+    metric: "ลด adjustment หลังส่งรายงานและลดเวลาปิดงวด",
+    pain: "ข้อมูลจาก core banking, loan และ deposit ใช้ definition ไม่ตรงกัน",
+    constraint: "BOT taxonomy, data lineage, sign-off control และ reporting deadline",
+    system: "data warehouse, regulatory reporting, core banking และ reconciliation tool",
+    process: "รวบรวมข้อมูล BOT ตรวจ mapping reconcile sign-off และส่งรายงาน",
+    risk: "นิยาม field ไม่ตรงกับ BOT taxonomy ทำให้รายงานผิดแม้ source data ถูก",
+    data: "account balance, loan exposure, customer segment, product code และ adjustment log",
+  },
+  {
+    org: "ศูนย์บริการลูกค้าของธนาคาร",
+    initiative: "สร้าง knowledge base สำหรับ agent ตอบคำถามผลิตภัณฑ์ธนาคารและเคสบริการ",
+    stakeholder: "Contact Center, Product, QA, Training, Compliance และลูกค้า",
+    userGroup: "bank call center agent",
+    metric: "ลด average handling time และเพิ่ม first contact resolution",
+    pain: "agent ค้นหาคำตอบไม่เจอและให้คำตอบไม่สม่ำเสมอเมื่อ policy เปลี่ยน",
+    constraint: "policy version, approved script, complaint handling rule และ QA audit",
+    system: "contact center, knowledge base, CRM และ case management",
+    process: "รับเคสผลิตภัณฑ์ธนาคาร ค้นหาคำตอบ ให้คำแนะนำ บันทึกผล และปิดเคส",
+    risk: "บทความเก่าถูกใช้หลัง policy หรือค่าธรรมเนียมเปลี่ยน",
+    data: "หมวดคำถาม policy version product code case type และผลประเมิน QA",
+  },
+  {
+    org: "ทีม Merchant Acquiring ของธนาคาร",
+    initiative: "ปรับระบบ settlement และ dispute สำหรับร้านค้ารับบัตร",
+    stakeholder: "Merchant Operations, Finance, Risk, Card Scheme และร้านค้า",
+    userGroup: "ร้านค้าที่รับชำระผ่านเครื่อง EDC และ QR",
+    metric: "ลด settlement mismatch และลดเวลาตอบ dispute ร้านค้า",
+    pain: "ร้านค้าเห็นยอดขายไม่ตรงกับยอดโอนเข้าบัญชีและไม่รู้รายการใดถูก hold",
+    constraint: "MDR fee, settlement cycle, chargeback rule และ merchant risk hold",
+    system: "acquiring platform, settlement engine, merchant portal และ core banking",
+    process: "รับรายการชำระเงิน คำนวณ fee settle เข้าบัญชี และจัดการ dispute",
+    risk: "ยอด settlement หลังหัก fee ไม่ตรงกับ statement ร้านค้า",
+    data: "merchant id, terminal id, gross amount, MDR fee, hold reason และ settlement batch",
+  },
+  {
+    org: "ฝ่ายติดตามหนี้และปรับโครงสร้างของธนาคาร",
+    initiative: "ทำ workflow debt restructuring สำหรับลูกค้าสินเชื่อรายย่อย",
+    stakeholder: "Collections, Credit Policy, Legal, Branch และลูกค้าสินเชื่อ",
+    userGroup: "เจ้าหน้าที่ติดตามหนี้ธนาคาร",
+    metric: "ลดบัญชีค้างชำระกลับเป็น NPL และเพิ่มอัตราปิดแผนปรับโครงสร้าง",
+    pain: "เจ้าหน้าที่ไม่เห็นเงื่อนไขที่ลูกค้าเข้าเกณฑ์ช่วยเหลือและต้องคำนวณแผนเอง",
+    constraint: "debt relief policy, DPD bucket, consent, credit bureau reporting และ approval limit",
+    system: "collection system, core loan, CRM และ document signing",
+    process: "ประเมินคุณสมบัติสินเชื่อ เสนอแผน อนุมัติ จัดทำสัญญา และติดตามการชำระ",
+    risk: "เงื่อนไขช่วยเหลือถูกใช้ผิดกลุ่มลูกค้าหรือเกินอำนาจอนุมัติ",
+    data: "DPD, outstanding balance, payment history, restructure option และ approval limit",
+  },
+  {
+    org: "ทีม Data Privacy ของธนาคาร",
+    initiative: "ปรับ consent preference center สำหรับลูกค้าธนาคารด้านการตลาดและ data sharing",
+    stakeholder: "PDPA Office, Marketing, Digital Channel, Legal และ Data Platform",
+    userGroup: "ลูกค้าที่จัดการ consent ผ่าน mobile banking",
+    metric: "ลด complaint เรื่องการใช้ข้อมูลและเพิ่มความครบถ้วนของ consent record",
+    pain: "ลูกค้าไม่เข้าใจว่า consent แต่ละประเภทกระทบบริการและการติดต่ออย่างไร",
+    constraint: "PDPA, consent withdrawal SLA, data retention และ audit evidence",
+    system: "mobile banking, consent management, CRM และ data platform",
+    process: "แสดง consent ลูกค้าธนาคาร รับการยินยอม ถอน consent sync downstream และเก็บหลักฐาน",
+    risk: "downstream system ยังใช้ consent เก่าหลังลูกค้าถอนความยินยอม",
+    data: "consent type, effective date, channel, withdrawal status และ audit timestamp",
+  },
+  {
+    org: "ฝ่ายบริการบัญชีเงินฝากของธนาคาร",
+    initiative: "ทำ service request สำหรับขอ statement และหนังสือรับรองบัญชี",
+    stakeholder: "Deposit Operations, Branch, Digital Channel, Compliance และลูกค้า",
+    userGroup: "ลูกค้าเงินฝากที่ขอเอกสารผ่าน mobile banking หรือสาขา",
+    metric: "ลดเวลารอเอกสารและลดการออกเอกสารผิดบัญชี",
+    pain: "ลูกค้าต้องขอซ้ำเพราะช่วงวันที่ ภาษา หรือประเภทเอกสารไม่ตรงกับที่ต้องใช้",
+    constraint: "KYC verification, fee rule, account ownership, document retention และ branch approval",
+    system: "core deposit, document generation, mobile banking และ branch system",
+    process: "รับคำขอ ตรวจเจ้าของบัญชี คิดค่าธรรมเนียม ออกเอกสาร และจัดส่ง",
+    risk: "เอกสารถูกออกให้บัญชีหรือช่วงวันที่ผิดและกระทบข้อมูลส่วนบุคคล",
+    data: "account number, statement period, document type, delivery channel และ fee code",
+  },
   {
     org: "ธนาคารดิจิทัล",
     initiative: "ปรับปรุง onboarding e-KYC สำหรับลูกค้าใหม่",
@@ -321,6 +662,8 @@ const CONTEXTS: CaseContext[] = [
     data: "transaction id, ledger entry, หลักฐานแชต และผลตรวจ fraud",
   },
 ];
+
+const ACTIVE_BANKING_CONTEXTS = CONTEXTS.slice(0, 18);
 
 const BLUEPRINTS: Record<OfficialReqGymArea, Blueprint[]> = {
   business_analysis_planning: [
@@ -1177,6 +1520,125 @@ const BLUEPRINTS: Record<OfficialReqGymArea, Blueprint[]> = {
   ],
 };
 
+function selectEcbaDomain(area: OfficialReqGymArea, seed: number): ReqGymEcbaDomain {
+  const domains = AREA_ECBA_DOMAINS[area];
+  return domains[Math.abs(seed) % domains.length];
+}
+
+function textFromContext(context: CaseContext): string {
+  return Object.values(context).join(" ");
+}
+
+function addBankingTag(tags: ReqGymBankingTag[], tag: ReqGymBankingTag): void {
+  if (!tags.includes(tag)) tags.push(tag);
+}
+
+function deriveBankingTagsFromText(text: string): ReqGymBankingTag[] {
+  const tags: ReqGymBankingTag[] = [];
+
+  if (/KYC|e-KYC|watchlist|ตัวตน|biometric|เปิดบัญชี/i.test(text)) addBankingTag(tags, "KYC / e-KYC");
+  if (/AML|CFT|CPF|sanction|watchlist|STR|money laundering|ธุรกรรมต้องสงสัย/i.test(text)) {
+    addBankingTag(tags, "AML / CFT / CPF");
+  }
+  if (/fraud|scam|mule|dispute|chargeback|อายัด|ทุจริต|ปลอม|บัตรหาย/i.test(text)) {
+    addBankingTag(tags, "Fraud / Scam / Mule Account");
+  }
+  if (/payment|โอนเงิน|พร้อมเพย์|bulk|settlement|switch|wallet|บัตร|card|merchant|QR|EDC|chargeback|MDR/i.test(text)) {
+    addBankingTag(tags, "Payment Systems");
+  }
+  if (/IT Security|authentication|OTP|cyber|mobile banking|connector|API|H2H|core banking|service availability|incident/i.test(text)) {
+    addBankingTag(tags, "IT Risk / Cyber Resilience");
+  }
+  if (/data|ข้อมูล|mapping|taxonomy|lineage|warehouse|metadata|definition|ACCOUNT_TYPE|reconcile|คุณภาพข้อมูล/i.test(text)) {
+    addBankingTag(tags, "Data Governance");
+  }
+  if (/PDPA|consent|privacy|ยินยอม|ข้อมูลส่วนบุคคล|data subject/i.test(text)) {
+    addBankingTag(tags, "PDPA / Consent / Privacy");
+  }
+  if (/responsible|สินเชื่อ|loan|mortgage|credit|debt|refinance|NPL|affordability|วงเงิน|กู้|หนี้|DSR/i.test(text)) {
+    addBankingTag(tags, "Responsible Lending");
+  }
+  if (/complaint|mis-selling|fee|ค่าธรรมเนียม|customer protection|Call Center|Contact Center|advisor|suitability/i.test(text)) {
+    addBankingTag(tags, "Market Conduct / Customer Protection");
+  }
+  if (/Operations|operation|สาขา|Branch|Teller|workflow|reversal|cut-off|SLA|case|GL|manual|ปฏิบัติการ|queue/i.test(text)) {
+    addBankingTag(tags, "Operational Risk");
+  }
+  if (/Vendor|third.?party|ธนาคารปลายทาง|partner|external|H2H|card scheme|บริการภายนอก/i.test(text)) {
+    addBankingTag(tags, "Third Party / Vendor");
+  }
+  if (/BOT|regulatory|รายงาน|taxonomy|FCD|e-FCD|Compliance|audit/i.test(text)) {
+    addBankingTag(tags, "Regulatory Reporting");
+  }
+  if (/สาขา|Branch|teller|queue/i.test(text)) addBankingTag(tags, "Branch Operations");
+  if (/Credit|สินเชื่อ|loan|mortgage|underwriting|bureau|หลักประกัน|LTV|DSR|scoring|appraisal/i.test(text)) {
+    addBankingTag(tags, "Credit Underwriting");
+  }
+  if (/ติดตามหนี้|ปรับโครงสร้าง|collections|debt|persistent|repayment|NPL|ชำระหนี้/i.test(text)) {
+    addBankingTag(tags, "Collections / Debt Assistance");
+  }
+  if (/open data|data sharing|customer.?authorized|Your Data|share data|โอนย้ายข้อมูล|แบ่งปันข้อมูล/i.test(text)) {
+    addBankingTag(tags, "Open Data / Customer Data Sharing");
+  }
+
+  if (tags.length < 2) addBankingTag(tags, "Operational Risk");
+  if (tags.length < 2) addBankingTag(tags, "Data Governance");
+
+  return tags;
+}
+
+function buildTestingPoint(
+  area: OfficialReqGymArea,
+  ecbaDomain: ReqGymEcbaDomain,
+  contextSummary: string,
+): string {
+  return `${AREA_TESTING_POINTS[area]} โดยโยงกับ ECBA domain "${ecbaDomain}" ในเคส ${contextSummary}`;
+}
+
+function buildDistractorRationales(
+  area: OfficialReqGymArea,
+  distractors: readonly string[],
+): string[] {
+  return distractors.map(
+    (distractor) =>
+      `${AREA_DISTRACTOR_RATIONALES[area]} ตัวเลือก "${distractor}" จึงเป็น distractor ที่สะท้อนความเข้าใจ BA ที่ยังไม่พอในงานแบงค์`,
+  );
+}
+
+export function enrichReqGymQuestionMetadata(
+  question: ReqGymQuestion,
+  seed = 0,
+): ReqGymQuestion {
+  if (!isOfficialReqGymArea(question.area)) return question;
+
+  const ecbaDomain = question.ecbaDomain ?? selectEcbaDomain(question.area, seed);
+  const text = `${question.promptTh} ${question.explanationTh} ${question.options.join(" ")}`;
+
+  return {
+    ...question,
+    ecbaDomain,
+    baccmConcepts:
+      question.baccmConcepts && question.baccmConcepts.length >= 2
+        ? question.baccmConcepts
+        : [...DOMAIN_BACCM_CONCEPTS[ecbaDomain]],
+    bankingTags:
+      question.bankingTags && question.bankingTags.length >= 2
+        ? question.bankingTags
+        : deriveBankingTagsFromText(text),
+    testingPoint:
+      question.testingPoint && question.testingPoint.trim().length >= 30
+        ? question.testingPoint
+        : buildTestingPoint(question.area, ecbaDomain, question.promptTh.slice(0, 80)),
+    distractorRationales:
+      question.distractorRationales && question.distractorRationales.length === 3
+        ? question.distractorRationales
+        : buildDistractorRationales(
+            question.area,
+            question.options.filter((_, index) => index !== question.answer),
+          ),
+  };
+}
+
 function buildAreaQuestions(
   area: OfficialReqGymArea,
   target: number,
@@ -1186,14 +1648,15 @@ function buildAreaQuestions(
   const blueprints = BLUEPRINTS[area];
   const prefix = AREA_PREFIX[area];
 
-  outer: for (let contextIndex = 0; contextIndex < CONTEXTS.length; contextIndex += 1) {
-    const context = CONTEXTS[(contextIndex + areaIndex * 3) % CONTEXTS.length];
+  outer: for (let contextIndex = 0; contextIndex < ACTIVE_BANKING_CONTEXTS.length; contextIndex += 1) {
+    const context = ACTIVE_BANKING_CONTEXTS[(contextIndex + areaIndex * 3) % ACTIVE_BANKING_CONTEXTS.length];
     for (let blueprintIndex = 0; blueprintIndex < blueprints.length; blueprintIndex += 1) {
       if (questions.length >= target) break outer;
       const serial = questions.length + 1;
       const blueprint = blueprints[blueprintIndex];
       const stem = blueprint.make(context);
       const answer = (serial + areaIndex + contextIndex + blueprintIndex) % 4;
+      const ecbaDomain = selectEcbaDomain(area, serial + contextIndex + blueprintIndex);
 
       questions.push({
         id: `rg-${prefix}-${String(serial).padStart(3, "0")}`,
@@ -1203,6 +1666,11 @@ function buildAreaQuestions(
         options: placeCorrectAnswer(stem.correct, stem.distractors, answer),
         answer,
         explanationTh: stem.explanationTh,
+        ecbaDomain,
+        baccmConcepts: [...DOMAIN_BACCM_CONCEPTS[ecbaDomain]],
+        bankingTags: deriveBankingTagsFromText(textFromContext(context)),
+        testingPoint: buildTestingPoint(area, ecbaDomain, context.initiative),
+        distractorRationales: buildDistractorRationales(area, stem.distractors),
       });
     }
   }
@@ -1256,7 +1724,9 @@ export const REQ_GYM_QUESTIONS: ReqGymQuestion[] = buildReqGymQuestionBank();
 export function resolveReqGymQuestionBank(
   remoteQuestions: readonly ReqGymQuestion[] | null | undefined,
 ): ReqGymQuestion[] {
-  const completeRemote = (remoteQuestions ?? []).filter(isCompleteOfficialQuestion);
+  const completeRemote = (remoteQuestions ?? [])
+    .filter(isCompleteOfficialQuestion)
+    .map((question, index) => enrichReqGymQuestionMetadata(question, index));
   if (completeRemote.length < REQ_GYM_QUESTION_TARGET) {
     return REQ_GYM_QUESTIONS;
   }

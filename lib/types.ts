@@ -78,6 +78,43 @@ export type KnowledgeArea =
   /** Legacy local/remote sample area from the initial beta bank. */
   | "underlying_competencies";
 
+export type ReqGymEcbaDomain =
+  | "Understanding Business Analysis"
+  | "Mindset for Effective Business Analysis"
+  | "Implementing Business Analysis"
+  | "Change"
+  | "Need"
+  | "Solution"
+  | "Stakeholder"
+  | "Value"
+  | "Context";
+
+export type ReqGymBaccmConcept =
+  | "Change"
+  | "Need"
+  | "Solution"
+  | "Stakeholder"
+  | "Value"
+  | "Context";
+
+export type ReqGymBankingTag =
+  | "KYC / e-KYC"
+  | "AML / CFT / CPF"
+  | "Fraud / Scam / Mule Account"
+  | "Payment Systems"
+  | "IT Risk / Cyber Resilience"
+  | "Data Governance"
+  | "PDPA / Consent / Privacy"
+  | "Responsible Lending"
+  | "Market Conduct / Customer Protection"
+  | "Operational Risk"
+  | "Third Party / Vendor"
+  | "Regulatory Reporting"
+  | "Branch Operations"
+  | "Credit Underwriting"
+  | "Collections / Debt Assistance"
+  | "Open Data / Customer Data Sharing";
+
 export type ReqGymQuestion = {
   id: string;
   area: KnowledgeArea;
@@ -86,6 +123,11 @@ export type ReqGymQuestion = {
   options: string[];
   answer: number;
   explanationTh: string;
+  ecbaDomain?: ReqGymEcbaDomain;
+  baccmConcepts?: ReqGymBaccmConcept[];
+  bankingTags?: ReqGymBankingTag[];
+  testingPoint?: string;
+  distractorRationales?: string[];
 };
 
 export type Template = {

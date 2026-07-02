@@ -66,7 +66,7 @@ export default function DailyReqPage() {
     saveDailyReqCompletion(c);
     void persistDailyReqCompletion(c, nickname);
     setDone({ score: result.correctCount ?? 0, total: result.total });
-    award("daily_req");
+    award("daily_req", { score: c.score, total: c.total });
   }
 
   const justFinished = done;

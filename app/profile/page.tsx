@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { BADGES } from "@/lib/gamify/badges";
 import { PERSONAS } from "@/lib/content";
 import { tierForLevel } from "@/lib/gamify/levels";
+import { ActivityTimeline } from "@/components/activity-timeline";
+import { StreakHeatmap } from "@/components/streak-heatmap";
 
 export default function ProfilePage() {
   const { profile, level, nickname, hasNickname } = useGamify();
@@ -151,6 +153,14 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Activity + heatmap */}
+      <section className="mx-auto mt-10 grid w-full max-w-5xl gap-6 px-4 sm:px-6 lg:grid-cols-2">
+        <StreakHeatmap />
+        <div>
+          <h2 className="mb-3 font-display text-xl font-700">กิจกรรมล่าสุด</h2>
+          <ActivityTimeline limit={5} />
+        </div>
+      </section>
       {/* Badges gallery */}
       <section className="mx-auto mt-10 w-full max-w-5xl px-4 sm:px-6">
         <div className="flex items-baseline justify-between">

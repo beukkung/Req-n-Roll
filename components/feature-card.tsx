@@ -8,6 +8,7 @@ export type FeatureCardProps = {
   titleTh: string;
   description: string;
   cta: string;
+  meta?: string[];
   /** Optional "new"/status pill */
   badge?: string;
 };
@@ -19,6 +20,7 @@ export function FeatureCard({
   titleTh,
   description,
   cta,
+  meta = [],
   badge,
 }: FeatureCardProps) {
   return (
@@ -41,6 +43,19 @@ export function FeatureCard({
         <h3 className="font-display text-lg font-700 tracking-tight">{title}</h3>
         <p className="text-xs text-muted-foreground">{titleTh}</p>
       </div>
+
+      {meta.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {meta.map((item) => (
+            <span
+              key={item}
+              className="rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] font-700 text-muted-foreground"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       <p className="flex-1 text-sm text-foreground/75">{description}</p>
 

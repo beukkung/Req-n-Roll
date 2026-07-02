@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -8,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { assignPersona } from "@/lib/persona";
+import { weakestSkillArea } from "@/lib/gamify/next-action";
 import { SKILLS } from "@/lib/content";
 import { accentVarFor } from "@/lib/cat";
 import type { SkillScores } from "@/lib/types";
@@ -28,6 +31,7 @@ export function PersonaResult({ scores }: PersonaResultProps) {
 
   const strongest = sorted[0];
   const weakest = sorted[sorted.length - 1];
+  const practiceHref = `/req-gym/practice/${weakestSkillArea(scores)}`;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
@@ -113,24 +117,26 @@ export function PersonaResult({ scores }: PersonaResultProps) {
               แล้วสอนเพื่อนในทีม
             </p>
           </div>
-          <div
-            className="rounded-lg border p-3"
+          <Link
+            href={practiceHref}
+            className="group rounded-lg border p-3 transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             style={{
               borderColor: `color-mix(in oklch, ${accent} 40%, transparent)`,
               backgroundColor: `color-mix(in oklch, ${accent} 6%, transparent)`,
             }}
           >
             <p
-              className="text-xs font-700 uppercase tracking-widest"
+              className="flex items-center gap-1.5 text-xs font-700 uppercase tracking-widest"
               style={{ color: accent }}
             >
               ฝึกเพิ่ม
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </p>
             <p className="mt-1 text-sm text-foreground/80">
-              ลอง <strong>{weakest.skill.nameTh}</strong> ผ่าน Daily Req และ
-              Req Gym สัปดาห์นี้
+              เริ่มจาก <strong>{weakest.skill.nameTh}</strong> — ไปฝึก Req Gym
+              พื้นที่ที่ตรงกับทักษะนี้
             </p>
-          </div>
+          </Link>
         </div>
       </div>
     </div>

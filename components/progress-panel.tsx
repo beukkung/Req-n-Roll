@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, ArrowRight, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Flame, ArrowRight, Sparkles, Trophy } from "lucide-react";
 import { useGamify } from "./gamify-context";
 import { LevelRing } from "./level-ring";
 import { Mascot } from "./mascot/mascot";
@@ -9,15 +10,65 @@ import { BadgeTile } from "./badge-tile";
 import { BADGE_MAP } from "@/lib/gamify/badges";
 import { PERSONAS } from "@/lib/content";
 import { tierForLevel } from "@/lib/gamify/levels";
+import { nextAction } from "@/lib/gamify/next-action";
+import { DAILY_PRACTICE_XP_GOAL, getLeaderboard } from "@/lib/gamify/profile";
+import { useJSON } from "@/lib/use-store";
+import {
+  bangkokDayKey,
+  DAILY_REQ_COMPLETION_KEY,
+  type DailyReqCompletion,
+} from "@/lib/daily-req";
+import { SKILL_AMP_RESULT_KEY, type SkillAmpResult } from "@/lib/skill-amp";
 
 export function ProgressPanel() {
-  const { profile, level } = useGamify();
+  const { profile, level, nickname } = useGamify();
   const persona = profile.personaSlug
     ? PERSONAS.find((p) => p.slug === profile.personaSlug)
     : null;
   const tier = tierForLevel(level.level);
   const recentBadges = profile.badges.slice(-3).reverse();
   const started = profile.totalXp > 0;
+
+  // Personalization inputs for the "Continue" CTA.
+  const skillAmpResult = useJSON<SkillAmpResult | null>(
+    SKILL_AMP_RESULT_KEY,
+    null,
+  );
+  const dailyCompletion = useJSON<DailyReqCompletion | null>(
+    DAILY_REQ_COMPLETION_KEY,
+    null,
+  );
+  const todayKey = bangkokDayKey();
+  const dailyDoneToday = dailyCompletion?.day === todayKey;
+  const todayPracticeXp =
+    profile.lastPracticeDate === todayKey ? (profile.dailyXp ?? 0) : 0;
+  const dailyGoalMet = profile.dailyGoalMetDay === todayKey;
+  const todayPracticeProgress = Math.min(
+    100,
+    Math.round((todayPracticeXp / DAILY_PRACTICE_XP_GOAL) * 100),
+  );
+
+  const action = nextAction({
+    ampCount: profile.stats.ampCount,
+    dailyDoneToday,
+    skillScores: skillAmpResult?.scores,
+    practicedAreas: profile.stats.gymAreas,
+  });
+
+  // Leaderboard rank nudge (remote only; null in demo/offline).
+  const [rank, setRank] = useState<number | null>(null);
+  useEffect(() => {
+    if (!nickname) return;
+    let active = true;
+    void getLeaderboard(nickname).then((d) => {
+      if (!active || !d.remote) return;
+      const idx = d.rows.findIndex((r) => r.isYou);
+      if (idx >= 0) setRank(idx + 1);
+    });
+    return () => {
+      active = false;
+    };
+  }, [nickname]);
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
@@ -76,19 +127,71 @@ export function ProgressPanel() {
               </div>
             </div>
 
-            {profile.streak > 0 ? (
-              <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-600 text-primary">
-                <Flame className="h-4 w-4" /> ติดต่อกัน {profile.streak} วัน
-              </p>
-            ) : null}
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+              {profile.streak > 0 ? (
+                <p className="inline-flex items-center gap-1.5 text-sm font-600 text-primary">
+                  <Flame className="h-4 w-4" /> ติดต่อกัน {profile.streak} วัน
+                </p>
+              ) : null}
+              {rank != null ? (
+                <Link
+                  href="/leaderboard"
+                  className="inline-flex items-center gap-1.5 text-sm font-600 text-foreground/70 transition-colors hover:text-primary"
+                >
+                  <Trophy className="h-4 w-4" /> อยู่อันดับที่ {rank}
+                </Link>
+              ) : null}
+            </div>
           </div>
         </div>
 
         {/* Right: recent badges / CTA */}
         <div className="flex flex-col justify-center rounded-xl border border-border bg-secondary/40 p-4 sm:p-5">
+          <div className="rounded-lg border border-border bg-background p-4">
+            <p className="text-xs font-700 uppercase tracking-widest text-primary">
+              Today&apos;s Practice
+            </p>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg bg-secondary px-2 py-3">
+                <p className="text-lg font-700 text-foreground">{todayPracticeXp}</p>
+                <p className="text-[11px] font-600 text-muted-foreground">XP today</p>
+              </div>
+              <div className="rounded-lg bg-secondary px-2 py-3">
+                <p className="text-lg font-700 text-foreground">
+                  {DAILY_PRACTICE_XP_GOAL}
+                </p>
+                <p className="text-[11px] font-600 text-muted-foreground">
+                  daily goal
+                </p>
+              </div>
+              <div className="rounded-lg bg-secondary px-2 py-3">
+                <p className="text-lg font-700 text-foreground">{profile.streak}</p>
+                <p className="text-[11px] font-600 text-muted-foreground">streak</p>
+              </div>
+            </div>
+            <div
+              className="mt-3 h-2 overflow-hidden rounded-full bg-secondary"
+              role="progressbar"
+              aria-label="Today's practice XP"
+              aria-valuenow={todayPracticeProgress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-[width] duration-500"
+                style={{ width: `${Math.max(4, todayPracticeProgress)}%` }}
+              />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {dailyGoalMet
+                ? "Daily threshold met. Keep the loop warm with one more drill."
+                : "Streak counts after one meaningful drill or enough XP today."}
+            </p>
+          </div>
+
           {recentBadges.length > 0 ? (
             <>
-              <p className="flex items-center gap-1.5 text-sm font-600">
+              <p className="mt-4 flex items-center gap-1.5 text-sm font-600">
                 <Sparkles className="h-4 w-4 text-primary" /> ตราล่าสุด
               </p>
               <div className="mt-3 grid grid-cols-3 gap-2">
@@ -117,12 +220,22 @@ export function ProgressPanel() {
           )}
 
           <Link
-            href={started ? "/profile" : "/daily-req"}
+            href={action.href}
             className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-600 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
           >
-            {started ? "ดูโปรไฟล์ของฉัน" : "เริ่มเล่น Daily Req"}
+            {action.label}
             <ArrowRight className="h-4 w-4" />
           </Link>
+          <Link
+            href="/tracklist"
+            className="mt-2 inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-600 text-foreground transition-colors hover:bg-secondary"
+          >
+            Open Tracklist
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            {action.sub}
+          </p>
         </div>
       </div>
     </section>

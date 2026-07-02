@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { GamifyContext, type ToastItem } from "./gamify-context";
+import { GamifyContext, type AwardOpts, type ToastItem } from "./gamify-context";
 import { computeAward, defaultProfile, persistRemote, saveProfile, PROFILE_KEY } from "@/lib/gamify/profile";
+import { appendActivity } from "@/lib/gamify/activity";
 import { levelFromTotalXp } from "@/lib/gamify/levels";
 import { BADGE_MAP } from "@/lib/gamify/badges";
 import { setNickname as persistNickname, NICKNAME_KEY } from "@/lib/nickname";
 import { useJSON } from "@/lib/use-store";
-import type { PersonaSlug } from "@/lib/types";
 import type { AwardResult, XpKind } from "@/lib/gamify/types";
 
 const DEFAULT_PROFILE = defaultProfile();
@@ -52,10 +52,18 @@ export function GamifyProvider({ children }: GamifyProviderProps) {
   );
 
   const award = useCallback(
-    (kind: XpKind, opts?: { personaSlug?: PersonaSlug; area?: string }): AwardResult => {
+    (kind: XpKind, opts: AwardOpts = {}): AwardResult => {
       const result = computeAward(profile, kind, opts);
-      saveProfile(result.profile); // writes + notifies → reactive re-render
+      saveProfile(result.profile); // writes + notifies -> reactive re-render
       void persistRemote(result.profile, kind, result.xpGained, nickname ?? undefined);
+
+      // Local-first activity log (feeds Profile timeline + streak heatmap).
+      appendActivity(kind, {
+        personaSlug: opts.personaSlug,
+        area: opts.area,
+        score: opts.score,
+        total: opts.total,
+      });
 
       pushToast({ kind: "xp", title: `+${result.xpGained} XP` });
       if (result.leveledUp) {
@@ -65,6 +73,10 @@ export function GamifyProvider({ children }: GamifyProviderProps) {
           title: `เลเวลอัป! Lv ${info.level}`,
           sub: info.title,
         });
+        celebrate();
+      }
+      // Celebrate on badge unlock too (not only on level up).
+      if (result.newBadges.length > 0) {
         celebrate();
       }
       for (const b of result.newBadges) {

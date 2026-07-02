@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { ArrowRight, Dumbbell } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { ReqGymSetList, type ReqGymSetInfo } from "@/components/req-gym-set-list";
 import { getReqGymSets } from "@/lib/req-gym";
 import { getReqGymPracticeSetSize } from "@/lib/req-gym-practice";
 import { getReqGymQuestionsRemote } from "@/lib/content-remote";
@@ -23,6 +23,19 @@ export default async function ReqGymPage() {
     {},
   );
 
+  const setInfo: ReqGymSetInfo[] = sets.map((set) => {
+    const count = set.mock ? reqGymQuestions.length : countByArea[set.id] ?? 0;
+    const setSize = Math.min(getReqGymPracticeSetSize(set.id), count);
+    return {
+      id: set.id,
+      nameTh: set.nameTh,
+      shortTh: set.shortTh,
+      count,
+      setSize,
+      mock: set.mock,
+    };
+  });
+
   return (
     <div className="py-12 sm:py-16">
       <PageHeader
@@ -36,30 +49,7 @@ export default async function ReqGymPage() {
       </PageHeader>
 
       <section className="mx-auto mt-10 w-full max-w-4xl px-4 sm:px-6">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {sets.map((set) => {
-            const count = set.mock ? reqGymQuestions.length : countByArea[set.id] ?? 0;
-            const setSize = Math.min(getReqGymPracticeSetSize(set.id), count);
-            return (
-              <Link
-                key={set.id}
-                href={`/req-gym/practice/${set.id}`}
-                className="group flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
-              >
-                <div>
-                  <h2 className="font-display text-lg font-700">{set.nameTh}</h2>
-                  <p className="mt-1 text-sm text-foreground/70">{set.shortTh}</p>
-                  <p className="mt-3 text-xs font-600 text-muted-foreground">
-                    สุ่ม {setSize} ข้อ/รอบ · จากคลัง {count} ข้อ
-                  </p>
-                </div>
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/12 text-primary transition-transform group-hover:translate-x-0.5">
-                  <ArrowRight className="h-5 w-5" />
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        <ReqGymSetList sets={setInfo} />
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
           IIBA-aligned practice · ไม่ใช่ข้อสอบอย่างเป็นทางการของ IIBA

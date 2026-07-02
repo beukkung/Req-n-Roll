@@ -4,8 +4,12 @@ export type XpKind =
   | "skill_amp"
   | "daily_req"
   | "req_gym"
+  | "role_play"
+  | "req_doctor"
+  | "coach_bot"
   | "template"
-  | "feedback";
+  | "feedback"
+  | "ba_assessment";
 
 export type BadgeId =
   | "first_amp"
@@ -33,6 +37,8 @@ export type Badge = {
   icon: string;
 };
 
+export type AreaBest = { score: number; total: number };
+
 export type ProfileStats = {
   ampCount: number;
   dailyCount: number;
@@ -40,6 +46,18 @@ export type ProfileStats = {
   gymAreas: string[];
   templateCount: number;
   feedbackCount: number;
+  rolePlayCount: number;
+  reqDoctorCount: number;
+  coachBotCount: number;
+  baAssessmentCount: number;
+  completedTrackSteps: string[];
+  /**
+   * Best score/total per Req Gym area (set id). Optional so older local
+   * profiles migrate cleanly; consumers read with `?? {}`.
+   */
+  gymBestByArea?: Record<string, AreaBest>;
+  /** Attempt count per Req Gym area (set id). */
+  gymAttemptsByArea?: Record<string, number>;
 };
 
 export type Profile = {
@@ -48,6 +66,9 @@ export type Profile = {
   streak: number;
   longestStreak: number;
   lastActiveDay: string | null;
+  dailyXp: number;
+  lastPracticeDate: string | null;
+  dailyGoalMetDay: string | null;
   badges: BadgeId[];
   personaSlug: PersonaSlug | null;
   displayName: string;

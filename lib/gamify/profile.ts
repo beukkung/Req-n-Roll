@@ -2,18 +2,33 @@ import { readJSON, writeJSON } from "../storage";
 import { bangkokDayKey } from "../daily-req";
 import { levelFromTotalXp } from "./levels";
 import { evaluateBadges } from "./badges";
-import type { AwardResult, Profile, XpKind } from "./types";
+import type { AreaBest, AwardResult, Profile, XpKind } from "./types";
 import type { PersonaSlug } from "../types";
 
 export const PROFILE_KEY = "reqn-roll:profile";
+export const DAILY_PRACTICE_XP_GOAL = 120;
 
 const XP_REWARDS: Record<XpKind, number> = {
   skill_amp: 100,
   daily_req: 30,
   req_gym: 40,
+  role_play: 50,
+  req_doctor: 35,
+  coach_bot: 20,
   template: 10,
   feedback: 15,
+  ba_assessment: 30,
 };
+
+const MEANINGFUL_DRILLS = new Set<XpKind>([
+  "skill_amp",
+  "daily_req",
+  "req_gym",
+  "role_play",
+  "req_doctor",
+  "coach_bot",
+  "ba_assessment",
+]);
 
 export function defaultProfile(): Profile {
   return {
@@ -22,6 +37,9 @@ export function defaultProfile(): Profile {
     streak: 0,
     longestStreak: 0,
     lastActiveDay: null,
+    dailyXp: 0,
+    lastPracticeDate: null,
+    dailyGoalMetDay: null,
     badges: [],
     personaSlug: null,
     displayName: "คุณ",
@@ -32,6 +50,13 @@ export function defaultProfile(): Profile {
       gymAreas: [],
       templateCount: 0,
       feedbackCount: 0,
+      rolePlayCount: 0,
+      reqDoctorCount: 0,
+      coachBotCount: 0,
+      baAssessmentCount: 0,
+      completedTrackSteps: [],
+      gymBestByArea: {},
+      gymAttemptsByArea: {},
     },
     updatedMs: Date.now(),
   };
@@ -60,6 +85,9 @@ export type AwardOptions = {
   area?: string;
   personaSlug?: PersonaSlug;
   ref?: string;
+  /** latest attempt score (req_gym / daily_req) — drives per-area best + log */
+  score?: number;
+  total?: number;
 };
 
 /** Pure: compute the next profile + what changed. No I/O. */
@@ -68,11 +96,21 @@ export function computeAward(
   kind: XpKind,
   opts: AwardOptions = {},
 ): AwardResult {
+  // Drop null/undefined stat values from the stored profile so a migrated
+  // or corrupted field (e.g. an old NaN->null counter) does not override the
+  // default. Only defined values win over defaults.
+  const cleanStats = Object.fromEntries(
+    Object.entries(prev.stats).filter(([, value]) => value != null),
+  );
   const profile: Profile = {
     ...prev,
     stats: {
-      ...prev.stats,
-      gymAreas: [...prev.stats.gymAreas],
+      ...defaultProfile().stats,
+      ...cleanStats,
+      gymAreas: [...(prev.stats.gymAreas ?? [])],
+      completedTrackSteps: [...(prev.stats.completedTrackSteps ?? [])],
+      gymBestByArea: { ...(prev.stats.gymBestByArea ?? {}) },
+      gymAttemptsByArea: { ...(prev.stats.gymAttemptsByArea ?? {}) },
     },
     badges: [...prev.badges],
   };
@@ -95,6 +133,41 @@ export function computeAward(
       if (opts.area && !profile.stats.gymAreas.includes(opts.area)) {
         profile.stats.gymAreas.push(opts.area);
       }
+      if (
+        opts.area &&
+        opts.score != null &&
+        opts.total != null &&
+        opts.total > 0
+      ) {
+        const bestByArea = profile.stats.gymBestByArea ?? {};
+        const attemptsByArea = profile.stats.gymAttemptsByArea ?? {};
+        const prevBest = bestByArea[opts.area];
+        const prevPct =
+          prevBest && prevBest.total > 0
+            ? prevBest.score / prevBest.total
+            : -1;
+        const newPct = opts.score / opts.total;
+        const best: AreaBest =
+          newPct >= prevPct
+            ? { score: opts.score, total: opts.total }
+            : (prevBest as AreaBest);
+        bestByArea[opts.area] = best;
+        attemptsByArea[opts.area] = (attemptsByArea[opts.area] ?? 0) + 1;
+        profile.stats.gymBestByArea = bestByArea;
+        profile.stats.gymAttemptsByArea = attemptsByArea;
+      }
+      break;
+    case "role_play":
+      profile.stats.rolePlayCount += 1;
+      break;
+    case "req_doctor":
+      profile.stats.reqDoctorCount += 1;
+      break;
+    case "coach_bot":
+      profile.stats.coachBotCount += 1;
+      break;
+    case "ba_assessment":
+      profile.stats.baAssessmentCount += 1;
       break;
     case "template":
       profile.stats.templateCount += 1;
@@ -106,14 +179,20 @@ export function computeAward(
 
   // 3. streak — first activity of a Bangkok day keeps/extends it
   const today = bangkokDayKey();
+  const dailyXpBefore = prev.lastPracticeDate === today ? (prev.dailyXp ?? 0) : 0;
+  profile.dailyXp = dailyXpBefore + amount;
+  profile.lastPracticeDate = today;
+  profile.lastActiveDay = today;
+
   let bonusXp = 0;
-  if (prev.lastActiveDay !== today) {
+  const goalMet = MEANINGFUL_DRILLS.has(kind) || profile.dailyXp >= DAILY_PRACTICE_XP_GOAL;
+  if (goalMet && prev.dailyGoalMetDay !== today) {
     profile.streak =
-      prev.lastActiveDay === yesterdayKey() ? prev.streak + 1 : 1;
+      prev.dailyGoalMetDay === yesterdayKey() ? prev.streak + 1 : 1;
     bonusXp = 5;
+    profile.dailyGoalMetDay = today;
   }
   profile.longestStreak = Math.max(prev.longestStreak, profile.streak);
-  profile.lastActiveDay = today;
 
   // 4. total XP + level
   const prevLevel = profile.level;

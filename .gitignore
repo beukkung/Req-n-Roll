@@ -24,6 +24,11 @@
 .DS_Store
 *.pem
 /home-fullpage.png
+/home-full.png
+/home-mobile.png
+
+# local source material
+/RAW*/
 
 # local agent/tool state
 /.codex/

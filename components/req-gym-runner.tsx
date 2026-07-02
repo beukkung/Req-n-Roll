@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, RefreshCw, Shuffle, Trophy } from "lucide-react";
 import { QuizStepper, type NormalizedQuestion, type QuizResult } from "@/components/quiz-stepper";
 import { useGamify } from "@/components/gamify-context";
+import { PracticeNudge } from "@/components/practice-nudge";
+import { XpRewardHint } from "@/components/xp-reward-hint";
 import { persistAttempt } from "@/lib/req-gym";
 import { getReqGymPracticeSetSize, selectReqGymPracticeQuestions } from "@/lib/req-gym-practice";
 import type { ReqGymQuestion } from "@/lib/types";
@@ -41,7 +43,7 @@ export function ReqGymRunner({ setId, setName, questions }: ReqGymRunnerProps) {
   function handleFinish(result: QuizResult) {
     const score = result.correctCount ?? 0;
     setDone({ score, total: result.total });
-    award("req_gym", { area: setId });
+    award("req_gym", { area: setId, score, total: result.total });
     void persistAttempt(setId, score, result.total, nickname);
   }
 
@@ -114,6 +116,15 @@ export function ReqGymRunner({ setId, setName, questions }: ReqGymRunnerProps) {
               เลือกชุดอื่น <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+          <PracticeNudge
+            className="mt-5"
+            description="Turn this result into another practice rep or ask for a coaching lens on the weak area."
+            actions={[
+              { href: "/req-gym", label: "Practice new set" },
+              { href: "/role-play", label: "Go to Role Play" },
+              { href: "/coach-bot", label: "Ask Coach" },
+            ]}
+          />
         </div>
       </div>
     );
@@ -127,6 +138,9 @@ export function ReqGymRunner({ setId, setName, questions }: ReqGymRunnerProps) {
           <p className="mt-1 text-xs font-600 text-muted-foreground">
             ชุดสุ่ม {Math.min(targetSize, activeQuestions.length)} ข้อจากคลัง {questions.length} ข้อ
           </p>
+          <div className="mt-2">
+            <XpRewardHint xp={40} label="XP per round" />
+          </div>
         </div>
         <button
           type="button"

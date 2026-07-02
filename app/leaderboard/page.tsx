@@ -80,6 +80,14 @@ export default function LeaderboardPage() {
           </p>
         ) : null}
 
+        <div className="mb-4 rounded-lg border border-primary/25 bg-primary/8 px-4 py-3">
+          <p className="text-sm font-700 text-primary">Weekly practice focus</p>
+          <p className="mt-1 text-sm text-foreground/75">
+            Rank still uses the existing XP table, but the habit to beat is this
+            weekly meaningful practice: one drill, one review, or one coaching loop.
+          </p>
+        </div>
+
         <ol className="space-y-2">
           {rows.map((r, i) => {
             const persona = r.personaSlug

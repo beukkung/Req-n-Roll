@@ -18,10 +18,18 @@ export type ToastItem = {
   sub?: string;
 };
 
+export type AwardOpts = {
+  personaSlug?: PersonaSlug;
+  area?: string;
+  /** latest attempt score (req_gym / daily_req) — feeds the activity log + per-area best */
+  score?: number;
+  total?: number;
+};
+
 export type GamifyContextValue = {
   profile: Profile;
   level: LevelInfo;
-  award: (kind: XpKind, opts?: { personaSlug?: PersonaSlug; area?: string }) => AwardResult;
+  award: (kind: XpKind, opts?: AwardOpts) => AwardResult;
   toasts: ToastItem[];
   dismissToast: (id: number) => void;
   /** bump to retrigger a celebration animation */
